@@ -1,13 +1,15 @@
 # lapis-components
 
 -- VIEW
-<% render("cells.my_cell.display", cell("my_cell:my_method")) %>
+<%- cell("notifications", { arg1 = "value1" }) %>
 
 -- VIEW CELL
+-- cells/notifications/display.etlua
 DISPLAY DE CELL
 <%= name %> 
 
 -- CELL
+-- cells/notifications/cell.lua
 local  display  = function(app, args)
   return {
     name = "Display method"

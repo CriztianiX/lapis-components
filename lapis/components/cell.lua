@@ -1,31 +1,38 @@
--- http://lua-users.org/wiki/MakingLuaLikePhp
-local split = function(div,str)
-  if (div=='') then 
-    return false 
-  end
-  
-  local pos,arr = 0,{}
-  for st,sp in function() return string.find(str,div,pos,true) end do
-    table.insert(arr,string.sub(str,pos,st-1))
-    pos = sp + 1
-  end
-
-  table.insert(arr,string.sub(str,pos))
-  return arr
+local cellm = function(name)
+  local split = require("lapis.components.common").split
+  local cem = split(":", name)
+  local path = "cells." .. cem[1]
+  local cell = path .. ".cell"
+  local method = cem[2] or "display"  
+  local template = path .. "." .. (method == "display" and "display" or method)
+  return cell, method, template
 end
 
+return function(self, name, args)
+  if not name then
+    error("Missing argument 'name' for cell")
+  end
 
-return function(app, name)
-  local cem = split(":",  name)
-  local cell = "cells." .. cem[1] .. ".cell"
-  local method = cem[2] or "display"
-
+  local cell, method, template = cellm(name)
   local status, mod = pcall(require, cell)
+
 
   if not status then
     error("Cell " .. cell .." not found")
   end
 
-  local res = mod[method]()
-  return res
+  if not mod[method] then
+    error("Method '" .. method .. "' not found in cell")
+  end
+
+  local status, widget = pcall(require, template)
+  
+  if not status then
+    error("Template '" .. template .. "' not found in cell")
+  end
+
+  local res = mod[method](self, args)
+  local view = widget(res)
+
+  return view:render_to_string()
 end
