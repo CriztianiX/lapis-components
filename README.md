@@ -50,3 +50,28 @@ You can execute other methods using the following:
 ``` lua
 <%- cell("notifications:my_messages_count", { arg1 = "value1" }) %>
 ``` 
+
+# Custom Router
+### Can handle protected request
+
+``` lua
+local lapis = require("lapis")
+local app = lapis.Application()
+-- Enable etlua template
+app:enable("etlua")
+local routerx = require("lapis.components.routerx")
+
+local routes = {
+  {
+    name = "root",
+    match = "/",
+    application = function(self)
+      return "Welcome to Lapis " .. require("lapis.version")
+    end,
+    public = true,
+    method = { "GET" }
+  }
+}
+
+return routerx(app, routes)
+```
