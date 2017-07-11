@@ -5,14 +5,16 @@ do
     capture_errors = application.capture_errors
 end
 
-return function(app, routes, request_validator)
-  --Not using request validator, all pass
-  if not request_validator then
-    request_validator = function(endpoint)
-      return capture_errors(function(self)
-        return endpoint.application(self)
-      end)
+return function(app, routes, opts)
+  local options = opts and next(opts) and opts or {}
+  local authentication
+  if not options.authentication then
+    do
+      local DummyAuth = require("lapis.components.auth.dummy")
+      authentication = DummyAuth()
     end
+  else
+    authentication = options.authentication
   end
 
   for _,e in ipairs(routes) do
@@ -26,7 +28,7 @@ return function(app, routes, request_validator)
   
     local dis = {}
     for _,v in ipairs(e.method) do
-      dis[v] = request_validator(e)
+      dis[v] = authentication:autenticate(e)
     end
     
     app:match(e.name, e.match, respond_to(dis))
