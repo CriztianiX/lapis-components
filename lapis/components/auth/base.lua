@@ -12,14 +12,6 @@ function Base:initialize(config)
 end
 
 function Base:autenticate(endpoint)
-    if endpoint.public then
-        return capture_errors({
-             function(lapis)
-                return endpoint.application(lapis)
-            end
-        })
-    end
-
     return capture_errors({
         self:_autenticate(endpoint)
     })

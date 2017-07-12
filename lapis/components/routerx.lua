@@ -5,15 +5,19 @@ do
     capture_errors = application.capture_errors
 end
 
+local pass = function(endpoint)
+  return capture_errors({
+      function(lapis)
+          return endpoint.application(lapis)
+      end
+  })
+end
+
 return function(app, routes, opts)
   local options = opts and next(opts) and opts or {}
   local authentication
-  if not options.authentication then
-    do
-      local DummyAuth = require("lapis.components.auth.dummy")
-      authentication = DummyAuth()
-    end
-  else
+  
+  if options.authentication then
     authentication = options.authentication
   end
 
@@ -28,9 +32,13 @@ return function(app, routes, opts)
   
     local dis = {}
     for _,v in ipairs(e.method) do
-      dis[v] = authentication:autenticate(e)
+      if (e.public) or (not authentication) then
+        dis[v] = pass(e)
+      else
+        dis[v] = authentication:autenticate(e)
+      end
     end
-    
+
     app:match(e.name, e.match, respond_to(dis))
   end
 
