@@ -11,10 +11,8 @@ function Base:initialize(config)
   self.config = config
 end
 
-function Base:autenticate(endpoint)
-    return capture_errors({
-        self:_autenticate(endpoint)
-    })
+function Base:is_authenticated(lapis)
+    error("Missing impl")
 end
 
 return Base
